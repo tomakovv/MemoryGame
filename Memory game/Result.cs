@@ -13,10 +13,7 @@ namespace Memory_game
             DifficultyLevel = dificultyLevel;
 
         }
-        public Result()
-        {
-
-        }
+ 
 
         [JsonInclude] public string Name { get; init; }
         [JsonInclude] public int Tries { get; init; }
@@ -24,10 +21,5 @@ namespace Memory_game
         [JsonInclude] public TimeSpan Time { get; init; }
         [JsonInclude] public LevelCode DifficultyLevel { get; init; }
 
-
-        public string Write()
-        {
-            return $"{Name} | {DateTime.Now.ToString()} | {Tries} | {Time.TotalSeconds}";
-        }
     }
 }
