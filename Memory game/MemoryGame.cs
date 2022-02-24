@@ -1,5 +1,8 @@
 ﻿
 
+using ConsoleTables;
+using System.Diagnostics;
+
 namespace Memory_game
 {
     public class MemoryGame
@@ -8,20 +11,28 @@ namespace Memory_game
         private static Random Random = new Random();
         private Element[,] Board { get; set; }
         private Level DifficlutyLevel { get; set; }
+        private Stopwatch Stopwatch;
+
 
         public MemoryGame(Level level, string[] avalibleWords)
         {
             DifficlutyLevel = level;
             Board = new Element[2, DifficlutyLevel.NumberOfWords];
             AvalibleWords = new List<string>(avalibleWords);
+            Stopwatch = new Stopwatch();
+
             FillInTheBoard();
         }
 
-        public void Play()
+        public Result Play()
         {
+            var guessChancesLeft = DifficlutyLevel.GuessChances;
             for (int i = 0; i < DifficlutyLevel.GuessChances; i++)
             {
                 ShowTheBoard();
+                
+                Console.WriteLine($"Guess chances:{guessChancesLeft}");
+                Stopwatch.Start();
                 var word1 = PickTheWord();
                 word1.SetStatus(ElementState.Revealed);
                 ShowTheBoard();
@@ -33,17 +44,30 @@ namespace Memory_game
                     word1.SetStatus(ElementState.Matched);
                     ShowTheBoard();
                 }
-                else if(word2.Back != word1.Back)
+                else if (word1.Back != word2.Back)
                 {
+                    guessChancesLeft--;
                     ShowTheBoard();
                     word2.SetStatus(ElementState.Hidden);
                     word1.SetStatus(ElementState.Hidden);
-                    DifficlutyLevel.GuessChances--;
+                    
                 }
-               
+                if (AllElementsMatched())
+                {
+                    var tries = i + 1;
+                    Stopwatch.Stop();
+                    TimeSpan stopwatchElapsed = Stopwatch.Elapsed;
+                    Console.WriteLine($"You solved the memory game after {tries} chances." +
+                        $" It tooks you {Convert.ToInt32(stopwatchElapsed.TotalSeconds)} seconds");
+                    Console.WriteLine("type your name:");
+                    var name = Console.ReadLine();
+                    return new Result(name, tries, stopwatchElapsed, DifficlutyLevel.LevelCode);
+
+                }
 
             }
-          
+            return null;
+
         }
 
         private string GetRandomWord()
@@ -73,41 +97,46 @@ namespace Memory_game
 
             }
         }
+        private bool AllElementsMatched()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < DifficlutyLevel.NumberOfWords; j++)
+                {
+                    if (Board[i, j].State != ElementState.Matched)
+                    {
+                        return false;
+                    }
+                }
+
+            }
+            return true;
+        }
 
         public void ShowTheBoard()
         {
             Console.WriteLine("-----------------------------");
-            Console.WriteLine("Level: " + DifficlutyLevel.Name);
-            Console.WriteLine("Guess chances: " + DifficlutyLevel.GuessChances);
+            Console.WriteLine($"Level: {DifficlutyLevel.Name}");
             Console.WriteLine();
-            for (int i = 0; i < DifficlutyLevel.NumberOfWords; i++)
+            var columns = new List<string>() { "" };
+            columns.AddRange(Enumerable.Range(1, DifficlutyLevel.NumberOfWords).Select(x => x.ToString()));
+            var table = new ConsoleTable(columns.ToArray());
+            table.Options.EnableCount = false;
+            var row1 = new List<string>() { "A" };
+            var row2 = new List<string>() { "B" };
+
+
+            for (int j = 0; j < DifficlutyLevel.NumberOfWords; j++)
             {
-                Console.Write($"{i + 1} ");
+                row1.Add(Board[0, j].ShowElement());
+                row2.Add(Board[1, j].ShowElement());
             }
+            table.AddRow(row1.ToArray());
+            table.AddRow(row2.ToArray());
+            table.Write();
             Console.WriteLine();
-            for (int i = 0; i < 2; i++)
-            {
-                switch (i)
-                {
-                    case 0:
-                        Console.Write("A ");
-                        break;
-                    case 1:
-                        Console.Write("B ");
-                        break;
-
-                    default:
-                        break;
-                }
-
-
-                for (int j = 0; j < DifficlutyLevel.NumberOfWords; j++)
-                {
-                    Console.Write(Board[i, j].ShowElement() + " ");
-                }
-                Console.WriteLine();
-            }
             Console.WriteLine("-----------------------------");
+            Console.WriteLine();
         }
         public Element PickTheWord()
         {
@@ -132,6 +161,11 @@ namespace Memory_game
                     if (column > 0 && column <= DifficlutyLevel.NumberOfWords)
                     {
                         selectedElement = Board[row.Value, column - 1];
+                        if (selectedElement.State == ElementState.Matched)
+                        {
+                            Console.WriteLine("This card is already matched");
+                            selectedElement = null;
+                        }
                     }
 
                 }
