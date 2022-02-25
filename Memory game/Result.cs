@@ -13,7 +13,8 @@ namespace Memory_game
             DifficultyLevel = dificultyLevel;
 
         }
- 
+        public Result()
+        { }
 
         [JsonInclude] public string Name { get; init; }
         [JsonInclude] public int Tries { get; init; }

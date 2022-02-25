@@ -11,52 +11,47 @@ namespace Memory_game
         private static Random Random = new Random();
         private Element[,] Board { get; set; }
         private Level DifficlutyLevel { get; set; }
-        private Stopwatch Stopwatch;
-
-
         public MemoryGame(Level level, string[] avalibleWords)
         {
             DifficlutyLevel = level;
             Board = new Element[2, DifficlutyLevel.NumberOfWords];
             AvalibleWords = new List<string>(avalibleWords);
-            Stopwatch = new Stopwatch();
-
             FillInTheBoard();
         }
 
         public Result Play()
         {
+            Stopwatch sw = Stopwatch.StartNew();
             var guessChancesLeft = DifficlutyLevel.GuessChances;
             for (int i = 0; i < DifficlutyLevel.GuessChances; i++)
             {
                 ShowTheBoard();
-                
+
                 Console.WriteLine($"Guess chances:{guessChancesLeft}");
-                Stopwatch.Start();
                 var word1 = PickTheWord();
                 word1.SetStatus(ElementState.Revealed);
                 ShowTheBoard();
                 var word2 = PickTheWord();
                 word2.SetStatus(ElementState.Revealed);
-                if (word1.Back == word2.Back)
+                if (word1.Back == word2.Back && word1.Id != word2.Id)
                 {
                     word2.SetStatus(ElementState.Matched);
                     word1.SetStatus(ElementState.Matched);
                     ShowTheBoard();
                 }
-                else if (word1.Back != word2.Back)
+                else
                 {
                     guessChancesLeft--;
                     ShowTheBoard();
                     word2.SetStatus(ElementState.Hidden);
                     word1.SetStatus(ElementState.Hidden);
-                    
+
                 }
                 if (AllElementsMatched())
                 {
                     var tries = i + 1;
-                    Stopwatch.Stop();
-                    TimeSpan stopwatchElapsed = Stopwatch.Elapsed;
+                    sw.Stop();
+                    TimeSpan stopwatchElapsed = sw.Elapsed;
                     Console.WriteLine($"You solved the memory game after {tries} chances." +
                         $" It tooks you {Convert.ToInt32(stopwatchElapsed.TotalSeconds)} seconds");
                     Console.WriteLine("type your name:");

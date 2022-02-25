@@ -2,8 +2,8 @@
 {
     class Program
     {
-        private static readonly string DefaultTextFile = @"C:\Users\Tomek\Downloads\Coding Task Motorola Academy C#\Words.txt";
-        private const int EXIT_OPTION = 0;
+        public enum Comands {Exit = 0, Yes = 1, No = 2};
+        private static readonly string DefaultTextFile = "Words.txt";
         private static ScoreBoard ScoreBoard = new ScoreBoard();
         private static List<Level> Levels = new List<Level>
 
@@ -24,7 +24,7 @@
                     Console.WriteLine($"{(int)level.LevelCode}. {level.Name}");
                 }
 
-                Console.WriteLine($"{EXIT_OPTION}. Exit");
+                Console.WriteLine($"{Comands.Exit}. Exit");
                 Level selectedLevel = null;
                 while (selectedLevel == null)
                 {
@@ -32,7 +32,7 @@
 
                     if (int.TryParse(input, out int selectedOption))
                     {
-                        if (selectedOption == EXIT_OPTION)
+                        if (selectedOption == (int)Comands.Exit)
                         {
                             return;
                         }
@@ -69,18 +69,18 @@
         private static bool ShouldContinue()
         {
             Console.WriteLine("Would you like to restart the game?");
-            Console.WriteLine("1.Yes");
-            Console.WriteLine("2.No");
+            Console.WriteLine($"{(int)Comands.Yes}.Yes");
+            Console.WriteLine($"{(int)Comands.No}.No");
             while (true)
             {
                 var input = Console.ReadLine();
                 if (int.TryParse(input, out int decision))
                 {
-                    if (decision == 1)
+                    if (decision == (int)Comands.Yes)
                     {
                         return true;
                     }
-                    else if (decision == 2)
+                    else if (decision == (int)Comands.No)
                     {
                         return false;
                     }

@@ -8,12 +8,14 @@ namespace Memory_game
     }
     public class Element
     {
+        public Guid Id { get;}
         public string Back { get;  }
         public string Front { get; }
         public ElementState State { get; private set; }
 
         public Element(string name)
         {
+            Id = Guid.NewGuid();
             Back = name;
             Front = "x";
             State = ElementState.Hidden;
